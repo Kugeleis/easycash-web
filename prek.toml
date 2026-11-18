@@ -10,26 +10,26 @@ hooks = [
     { id = "check-added-large-files" },
 ]
 
-
 [[repos]]
 repo = "https://github.com/astral-sh/ruff-pre-commit"
 rev = "v0.11.0"
 hooks = [
-  { id = "ruff", args = ["--fix"] },
-  { id = "ruff-format" },
+    { id = "ruff", args = ["--fix"] },
+    { id = "ruff-format" },
 ]
 
 [[repos]]
 repo = "local"
 hooks = [
-  { id = "ty", name = "ty check", entry = "ty check", language = "system", types_or = ["python", "pyi"], pass_filenames = false },
+    { id = "ty", name = "ty check", entry = "ty check", language = "system", types_or = ["python", "pyi"], pass_filenames = false },
 ]
 
 [[repos]]
 repo = "local"
 hooks = [
-  { id = "pytest", name = "pytest", entry = "pytest", language = "system", pass_filenames = false, always_run = true }
+    { id = "pytest", name = "pytest", entry = "pytest", language = "system", pass_filenames = false, always_run = true },
 ]
+
 # Commit message convention: Conventional Commits
 # See CONTRIBUTING.md for details
 # Format: type(scope): short description
