@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from decimal import ROUND_HALF_UP, Decimal
-from typing import Union
 
 
 class MoneyError(ValueError):
     """Raised for invalid money operations."""
+
     pass
 
 
@@ -18,7 +18,7 @@ def cents_to_str(cents: int) -> str:
     return f"{sign}{a // 100}.{a % 100:02d}"
 
 
-def str_to_cents(s: Union[str, Decimal, float, int]) -> int:
+def str_to_cents(s: str | Decimal | float | int) -> int:
     """Parse a money string like "119.00" or "-5.5" into integer cents.
 
     Rules:

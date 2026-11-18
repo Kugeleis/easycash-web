@@ -33,9 +33,7 @@ class TestStorageIntegration:
 
         # Add some data
         book.accounts.append(Account(name="Bürobedarf", type="expense"))
-        book.tax_rates.append(
-            TaxRate(name="Regel", valid_from="2007-01-01", promille=19000)
-        )
+        book.tax_rates.append(TaxRate(name="Regel", valid_from="2007-01-01", promille=19000))
         book.bookings.append(
             Booking(
                 date="2026-01-15",
@@ -87,11 +85,15 @@ class TestStorageIntegration:
         from easycash_web.models import BookFile
 
         # Create a book file content manually
-        content = BookFile(
-            format="easycash-web",
-            format_version=1,
-            meta={"client_name": "ImportTest"},
-        ).model_dump_json(indent=2).encode("utf-8")
+        content = (
+            BookFile(
+                format="easycash-web",
+                format_version=1,
+                meta={"client_name": "ImportTest"},
+            )
+            .model_dump_json(indent=2)
+            .encode("utf-8")
+        )
 
         # Import
         book = import_bytes(data_dir, "ImportTest", content)
@@ -104,9 +106,9 @@ class TestStorageIntegration:
         """Importing a book with newer format_version should reject."""
 
         # Create content with format_version 2 (not supported in v1)
-        content = json.dumps(
-            {"format": "easycash-web", "format_version": 2, "revision": 0}
-        ).encode("utf-8")
+        content = json.dumps({"format": "easycash-web", "format_version": 2, "revision": 0}).encode(
+            "utf-8"
+        )
 
         with pytest.raises(BookVersionError):
             import_bytes(data_dir, "NewFormat", content)
