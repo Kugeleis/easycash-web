@@ -5,9 +5,10 @@ WORKDIR /app
 # Copy pyproject.toml and uv.lock
 COPY pyproject.toml .
 COPY uv.lock .
+COPY README.md .
 
-# Install dependencies
-RUN uv sync --no-dev
+# Install dependencies (skip installing local project for now)
+RUN uv sync --no-dev --no-install-project
 
 # Copy source code
 COPY src/ ./src/
@@ -37,4 +38,4 @@ ENV PATH="/app/.venv/bin:$PATH"
 EXPOSE 8000
 
 # Run the app
-CMD ["uv", "run", "uvicorn", "src.easycash_web.api:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "easycash_web.api:app", "--host", "0.0.0.0", "--port", "8000"]
