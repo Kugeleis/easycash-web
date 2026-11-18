@@ -43,7 +43,12 @@ from easycash_web.storage import (
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+    try:
+        STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+    except OSError as e:
+        # Data dir not writable (e.g. /data without root) — log and continue.
+        # Operations will surface a clear error if a book needs to be saved.
+        print(f"Warning: could not create DATA_DIR {STORAGE_DIR}: {e}")
     yield
 
 
