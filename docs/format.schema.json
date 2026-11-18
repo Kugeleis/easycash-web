@@ -1,0 +1,464 @@
+{
+  "$defs": {
+    "Account": {
+      "description": "Account — income or expense account.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Account name",
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/AccountType",
+          "default": "expense"
+        },
+        "currency": {
+          "default": "EUR",
+          "title": "Currency",
+          "type": "string"
+        },
+        "client_id": {
+          "default": "",
+          "title": "Client Id",
+          "type": "string"
+        },
+        "business_id": {
+          "default": "",
+          "title": "Business Id",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Account",
+      "type": "object"
+    },
+    "AccountType": {
+      "enum": [
+        "income",
+        "expense"
+      ],
+      "title": "AccountType",
+      "type": "string"
+    },
+    "AfAMode": {
+      "enum": [
+        "annual",
+        "half_year",
+        "month_precise",
+        "per_settings"
+      ],
+      "title": "AfAMode",
+      "type": "string"
+    },
+    "Booking": {
+      "description": "Booking line.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "booking_number": {
+          "default": "",
+          "description": "User-visible booking number",
+          "title": "Booking Number",
+          "type": "string"
+        },
+        "receipt_number": {
+          "default": "",
+          "description": "User-visible receipt number",
+          "title": "Receipt Number",
+          "type": "string"
+        },
+        "date": {
+          "format": "date",
+          "title": "Date",
+          "type": "string"
+        },
+        "description": {
+          "default": "",
+          "maxLength": 256,
+          "title": "Description",
+          "type": "string"
+        },
+        "account_id": {
+          "default": "",
+          "title": "Account Id",
+          "type": "string"
+        },
+        "account_name": {
+          "default": "",
+          "title": "Account Name",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/BookingType",
+          "default": "expense"
+        },
+        "gross_cents": {
+          "default": 0,
+          "description": "Gross amount in integer cents",
+          "title": "Gross Cents",
+          "type": "integer"
+        },
+        "vat_rate_promille": {
+          "default": 0,
+          "description": "Percent*1000, e.g. 19000 for 19%",
+          "title": "Vat Rate Promille",
+          "type": "integer"
+        },
+        "vat_rate_percent": {
+          "default": 0,
+          "description": "Percent, e.g. 19 for 19%",
+          "title": "Vat Rate Percent",
+          "type": "integer"
+        },
+        "af_a_mode": {
+          "$ref": "#/$defs/AfAMode",
+          "default": "per_settings"
+        },
+        "af_a_method": {
+          "$ref": "#/$defs/DepreciationMethod",
+          "default": "linear"
+        },
+        "af_a_jahre": {
+          "default": 0,
+          "description": "Depreciation years",
+          "title": "Af A Jahre",
+          "type": "integer"
+        },
+        "af_a_satz_promille": {
+          "default": 0,
+          "description": "Depreciation rate percent*1000",
+          "title": "Af A Satz Promille",
+          "type": "integer"
+        },
+        "af_a_restwert_cents": {
+          "default": 0,
+          "description": "Residual value in cents",
+          "title": "Af A Restwert Cents",
+          "type": "integer"
+        },
+        "client_id": {
+          "default": "",
+          "title": "Client Id",
+          "type": "string"
+        },
+        "business_id": {
+          "default": "",
+          "title": "Business Id",
+          "type": "string"
+        },
+        "year": {
+          "default": 0,
+          "title": "Year",
+          "type": "integer"
+        },
+        "month": {
+          "default": 0,
+          "title": "Month",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "date"
+      ],
+      "title": "Booking",
+      "type": "object"
+    },
+    "BookingType": {
+      "enum": [
+        "income",
+        "expense"
+      ],
+      "title": "BookingType",
+      "type": "string"
+    },
+    "Business": {
+      "description": "Business (Betrieb) under a client.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Business name",
+          "title": "Name",
+          "type": "string"
+        },
+        "business_type": {
+          "$ref": "#/$defs/BusinessType",
+          "default": "freiberufler"
+        },
+        "tax_id": {
+          "default": "",
+          "description": "Steuernummer",
+          "title": "Tax Id",
+          "type": "string"
+        },
+        "vat_id": {
+          "default": "",
+          "description": "Umsatzsteuer-IdNr.",
+          "title": "Vat Id",
+          "type": "string"
+        },
+        "kleinunternehmer": {
+          "default": false,
+          "description": "§19 UStG Kleinunternehmerregelung",
+          "title": "Kleinunternehmer",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Business",
+      "type": "object"
+    },
+    "BusinessType": {
+      "enum": [
+        "freiberufler",
+        "kleinunternehmer"
+      ],
+      "title": "BusinessType",
+      "type": "string"
+    },
+    "Client": {
+      "description": "Client (Mandant) — top-level entity containing one JSON book file.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Mandant name",
+          "title": "Name",
+          "type": "string"
+        },
+        "businesses": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Business"
+          },
+          "title": "Businesses",
+          "type": "array"
+        },
+        "accounts": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Account"
+          },
+          "title": "Accounts",
+          "type": "array"
+        },
+        "tax_rates": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/TaxRate"
+          },
+          "title": "Tax Rates",
+          "type": "array"
+        },
+        "bookings": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/Booking"
+          },
+          "title": "Bookings",
+          "type": "array"
+        },
+        "recurring": {
+          "default": [],
+          "items": {
+            "$ref": "#/$defs/RecurringBooking"
+          },
+          "title": "Recurring",
+          "type": "array"
+        },
+        "settings": {
+          "additionalProperties": true,
+          "title": "Settings",
+          "type": "object"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "Client",
+      "type": "object"
+    },
+    "DepreciationMethod": {
+      "enum": [
+        "linear",
+        "degressive"
+      ],
+      "title": "DepreciationMethod",
+      "type": "string"
+    },
+    "RecurringBooking": {
+      "description": "Recurring booking template.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "name": {
+          "description": "Template name",
+          "title": "Name",
+          "type": "string"
+        },
+        "interval_months": {
+          "default": 1,
+          "description": "1=monthly, 3=quarterly, etc.",
+          "minimum": 1,
+          "title": "Interval Months",
+          "type": "integer"
+        },
+        "next_due": {
+          "format": "date",
+          "title": "Next Due",
+          "type": "string"
+        },
+        "booking": {
+          "$ref": "#/$defs/Booking"
+        }
+      },
+      "required": [
+        "name",
+        "next_due",
+        "booking"
+      ],
+      "title": "RecurringBooking",
+      "type": "object"
+    },
+    "TaxRate": {
+      "description": "VAT rate applicable to a booking/account/period.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "code": {
+          "default": "DE",
+          "description": "Country code, e.g. DE",
+          "title": "Code",
+          "type": "string"
+        },
+        "name": {
+          "description": "Human-readable label, e.g. 'Regelsteuersatz'",
+          "title": "Name",
+          "type": "string"
+        },
+        "promille": {
+          "default": 19000,
+          "description": "Percent * 1000, e.g. 19000 for 19%",
+          "title": "Promille",
+          "type": "integer"
+        },
+        "valid_from": {
+          "format": "date",
+          "title": "Valid From",
+          "type": "string"
+        },
+        "valid_to": {
+          "anyOf": [
+            {
+              "format": "date",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Valid To"
+        },
+        "description": {
+          "default": "",
+          "title": "Description",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "valid_from"
+      ],
+      "title": "TaxRate",
+      "type": "object"
+    }
+  },
+  "description": "One JSON file per client (Mandant).",
+  "properties": {
+    "format": {
+      "default": "easycash-web",
+      "description": "Format identifier",
+      "title": "Format",
+      "type": "string"
+    },
+    "format_version": {
+      "default": 1,
+      "description": "Schema version",
+      "title": "Format Version",
+      "type": "integer"
+    },
+    "revision": {
+      "default": 0,
+      "description": "Incremented on every save",
+      "title": "Revision",
+      "type": "integer"
+    },
+    "meta": {
+      "additionalProperties": true,
+      "description": "client name, business type, timestamps",
+      "title": "Meta",
+      "type": "object"
+    },
+    "settings": {
+      "additionalProperties": true,
+      "title": "Settings",
+      "type": "object"
+    },
+    "accounts": {
+      "items": {
+        "$ref": "#/$defs/Account"
+      },
+      "title": "Accounts",
+      "type": "array"
+    },
+    "tax_rates": {
+      "items": {
+        "$ref": "#/$defs/TaxRate"
+      },
+      "title": "Tax Rates",
+      "type": "array"
+    },
+    "bookings": {
+      "items": {
+        "$ref": "#/$defs/Booking"
+      },
+      "title": "Bookings",
+      "type": "array"
+    },
+    "recurring": {
+      "items": {
+        "$ref": "#/$defs/RecurringBooking"
+      },
+      "title": "Recurring",
+      "type": "array"
+    },
+    "clients": {
+      "items": {
+        "$ref": "#/$defs/Client"
+      },
+      "title": "Clients",
+      "type": "array"
+    }
+  },
+  "title": "BookFile",
+  "type": "object"
+}

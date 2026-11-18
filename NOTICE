@@ -1,0 +1,21 @@
+# License: GPL-3.0-or-later
+
+Copyright (c) 2026 Richard Kugeleis
+
+Third-party notices:
+
+Web Awesome (formerly @awesome.me/webawesome)
+  Version: 3.15.0
+  License: MIT
+  Source: <https://github.com/webawesomenet/core>
+
+Tabulator
+  Version: 6.7.1
+  License: MIT
+  Source: <https://github.com/olifolkerd/tabulator>
+
+EasyCash&Tax reference data (retrieved from GitHub)
+  Source: <https://github.com/Thomas-Mielke-Software/EasyCash>
+  License: GPL-3.0 (see LIZENZ.txt)
+
+All other code in this repository is copyright (c) 2026 Richard Kugeleis and licensed under GPL-3.0-or-later.
