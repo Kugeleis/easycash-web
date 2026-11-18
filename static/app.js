@@ -229,7 +229,7 @@ function initGrid(bookings) {
 
 // ── New booking form ─────────────────────────────────────────────────────
 
-function showNewBookingForm() {
+async function showNewBookingForm() {
     if (!currentClient) {
         alert(i18n.client?.select_first || "Bitte wählen Sie zuerst einen Mandanten aus.");
         return;
@@ -237,7 +237,27 @@ function showNewBookingForm() {
     const form = document.getElementById("new-booking-form");
     form.classList.remove("hidden");
     document.getElementById("booking-date").value = new Date().toISOString().slice(0, 10);
+    const receiptInput = document.getElementById("booking-receipt");
+    const nextReceipt = await getNextReceiptNumber(currentClient);
+    if (!receiptInput.value) {
+        receiptInput.value = String(nextReceipt);
+    }
     document.getElementById("booking-date").focus();
+}
+
+// Helper: return the next free integer for the Belegnummer (max used + 1).
+async function getNextReceiptNumber(clientName) {
+    try {
+        const book = await apiGet(`/book/${encodeURIComponent(clientName)}`);
+        let max = 0;
+        for (const b of book.bookings || []) {
+            const val = parseInt(b.receipt_number, 10);
+            if (Number.isFinite(val) && val > max) max = val;
+        }
+        return max + 1;
+    } catch {
+        return 1;
+    }
 }
 
 async function createNewBooking(event) {
