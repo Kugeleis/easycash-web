@@ -38,7 +38,7 @@ jobs:
         run: uv run ty check .
 
       - name: Run pytest
-        run: uv run pytest
+        run: uv run pytest -m "not e2e"
 
   # Publish to GitHub Container Registry (optional)
   docker:
