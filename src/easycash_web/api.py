@@ -1,6 +1,7 @@
 """FastAPI application for EasyCash&Tax Web."""
 
 import json
+from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Response, UploadFile
@@ -28,7 +29,14 @@ from easycash_web.storage import (
     save_book,
 )
 
-app = FastAPI(title="EasyCash&Tax Web", version="0.2.0")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+    yield
+
+
+app = FastAPI(title="EasyCash&Tax Web", version="0.2.0", lifespan=lifespan)
 
 # ── Static file serving (import map, vendor, HTML) ─────────────────────────
 
@@ -47,7 +55,7 @@ async def health():
 @app.get("/api/v1/schema", include_in_schema=False)
 async def schema():
     """Serve generated JSON Schema from Pydantic models."""
-    return BookFile.schema()
+    return BookFile.model_json_schema()
 
 
 # ── Book file CRUD ───────────────────────────────────────────────────────────
@@ -250,9 +258,4 @@ async def add_business(client_name: str, biz: dict):
     return save_book(STORAGE_DIR, client_name, book)
 
 
-# ── Startup: ensure DATA_DIR exists ───────────────────────────────────────────
-
-
-@app.on_event("startup")
-async def on_startup():
-    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+# ── Startup: ensure DATA_DIR exists via lifespan (FastAPI ≥0.9) ──────────────────
