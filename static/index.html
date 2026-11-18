@@ -10,23 +10,35 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.15.0/dist/css/tabulator.min.css">
     <!-- Main styles -->
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; }
-        .container { display: flex; flex: 1; }
-        .sidebar { width: 250px; padding: 20px; background: #f4f4f4; }
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; background: #fff; }
+        .container { display: flex; flex: 1; overflow: hidden; }
+        .sidebar { width: 250px; padding: 20px; background: #f4f4f4; flex-shrink: 0; overflow-y: auto; }
         .main { flex: 1; padding: 20px; overflow-y: auto; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; background: #3498db; color: white; }
-        .top-bar select { padding: 8px; }
-        .top-bar button { padding: 8px 12px; background: #2ecc71; color: white; border: none; cursor: pointer; }
-        .top-bar button:hover { background: #27ae60; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px; background: #3498db; color: white; flex-shrink: 0; }
+        .top-bar select { padding: 8px; background: #fff; border: none; }
+        .btn { padding: 8px 12px; background: #2ecc71; color: white; border: none; cursor: pointer; border-radius: 3px; margin-top: 10px; }
+        .btn:hover { background: #27ae60; }
+        .btn.secondary { background: #3498db; }
+        .btn.secondary:hover { background: #2980b9; }
         .grid-container { height: 600px; border: 1px solid #ddd; margin-bottom: 20px; }
         .calculator { background: #ecf0f1; padding: 15px; border-radius: 5px; }
-        .calculator input { width: 100%; padding: 8px; margin: 5px 0; }
-        .calculator button { padding: 8px 12px; background: #3498db; color: white; border: none; cursor: pointer; }
+        .calculator input { width: 100%; padding: 8px; margin: 5px 0; box-sizing: border-box; }
+        .calculator button { padding: 8px 12px; background: #3498db; color: white; border: none; cursor: pointer; border-radius: 3px; margin-right: 5px; }
+        .calculator button:hover { background: #2980b9; }
+        .calculator #calc-result { margin-top: 10px; font-weight: bold; color: #27ae60; }
         .sidebar ul { list-style: none; padding: 0; }
         .sidebar li { margin: 10px 0; }
-        .sidebar a { text-decoration: none; color: #3498db; }
-        .sidebar a:hover { text-decoration: underline; }
+        .nav-item { text-decoration: none; color: #3498db; display: block; padding: 8px; border-radius: 3px; }
+        .nav-item:hover { background: #e0e0e0; }
+        .nav-item.active { background: #3498db; color: white; }
+        .view { display: block; }
+        .view.hidden { display: none !important; }
+        .empty-state { color: #888; font-style: italic; }
+        .empty-state a { color: #3498db; }
+        #client-list li { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
+        #client-list li:hover { background: #f0f0f0; }
         .i18n { display: none; }
+        h2 { margin-top: 0; }
     </style>
 </head>
 <body>
@@ -40,22 +52,34 @@
     <div class="container">
         <div class="sidebar">
             <ul>
-                <li><a href="#" id="nav-client"><i class="fa fa-user"></i> Mandanten</a></li>
-                <li><a href="#" id="nav-business"><i class="fa fa-building"></i> Betrieb</a></li>
-                <li><a href="#" id="nav-account"><i class="fa fa-cogs"></i> Konten</a></li>
-                <li><a href="#" id="nav-booking"><i class="fa fa-file-alt"></i> Buchungen</a></li>
-                <li><a href="#" id="nav-calculator"><i class="fa fa-calculator"></i> Rechner</a></li>
+                <li><a href="#clients" id="nav-client" class="nav-item active"><i class="fa fa-user"></i> Mandanten</a></li>
+                <li><a href="#bookings" id="nav-booking" class="nav-item"><i class="fa fa-file-alt"></i> Buchungen</a></li>
+                <li><a href="#calculator" id="nav-calculator" class="nav-item"><i class="fa fa-calculator"></i> Rechner</a></li>
             </ul>
         </div>
 
         <div class="main">
-            <div class="grid-container" id="booking-grid"></div>
+            <!-- View: Clients -->
+            <div class="view" id="view-clients">
+                <h2>Mandanten</h2>
+                <button id="new-client" class="btn"><i class="fa fa-plus"></i> Neuer Mandant</button>
+                <div id="client-list"></div>
+            </div>
 
-            <div class="calculator" id="calculator">
-                <h3><i class="fa fa-calculator"></i> Rechner</h3>
-                <input type="text" id="calc-input" placeholder="Gib einen Betrag ein (z.B. 100+50*1.19)">
-                <button id="calc-clear"><i class="fa fa-trash"></i> Löschen</button>
-                <button id="calc-eval"><i class="fa fa-check"></i> Berechnen</button>
+            <!-- View: Bookings -->
+            <div class="view hidden" id="view-bookings">
+                <h2>Buchungen</h2>
+                <div class="grid-container" id="booking-grid"></div>
+            </div>
+
+            <!-- View: Calculator -->
+            <div class="view hidden" id="view-calculator">
+                <div class="calculator" id="calculator">
+                    <input type="text" id="calc-input" placeholder="Gib einen Betrag ein (z.B. 100+50*1.19)">
+                    <button id="calc-clear" class="btn"><i class="fa fa-trash"></i> Löschen</button>
+                    <button id="calc-eval" class="btn"><i class="fa fa-check"></i> Berechnen</button>
+                    <div id="calc-result"></div>
+                </div>
             </div>
         </div>
     </div>
