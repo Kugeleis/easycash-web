@@ -120,7 +120,8 @@ async function createNewClient() {
 async function loadClientSelect() {
     const data = await apiGet("/clients");
     const select = document.getElementById("client-select");
-    select.innerHTML = "<option value=\"\">Select client...</option>";
+    const selectLabel = i18n.app?.select_client || "Mandant auswählen...";
+    select.innerHTML = `<option value="">${selectLabel}</option>`;
 
     for (const c of data.clients) {
         const opt = document.createElement("option");
@@ -212,7 +213,7 @@ function initGrid(bookings) {
 
 function showNewBookingDialog() {
     if (!currentClient) {
-        alert(i18n.select_client_first || "Bitte wählen Sie zuerst einen Mandanten aus.");
+        alert(i18n.client?.select_first || "Bitte wählen Sie zuerst einen Mandanten aus.");
         return;
     }
     const date = prompt("Datum (YYYY-MM-DD):", new Date().toISOString().slice(0, 10));
@@ -303,7 +304,7 @@ async function init() {
     document.getElementById("nav-booking").addEventListener("click", async (e) => {
         e.preventDefault();
         if (!currentClient) {
-            alert(i18n.select_client_first || "Bitte wählen Sie zuerst einen Mandanten aus.");
+            alert(i18n.client?.select_first || "Bitte wählen Sie zuerst einen Mandanten aus.");
             showView("clients");
             return;
         }
