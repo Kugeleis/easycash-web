@@ -1,0 +1,57 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Install dependencies using uv
+    cmds:
+    - uv sync
+
+  lint:
+    desc: Run ruff for linting and autofix fixable errors
+    cmds:
+    - uv run ruff check --fix .
+
+  format:
+    desc: Run ruff for formatting
+    cmds:
+    - uv run ruff format .
+
+  test:
+    desc: Run tests using pytest
+    cmds:
+    - uv run pytest
+
+  type-check:
+    desc: Run static type checking using ty
+    cmds:
+    - uv run ty check .
+
+  check:
+    desc: Run all quality checks (lint, format, type-check, test)
+    cmds:
+    - task: lint
+    - task: format
+    - task: type-check
+    - task: test
+
+  clean:
+    desc: Remove temporary files, caches, and merged branches
+    cmds:
+    - rm -rf .pytest_cache .ruff_cache
+    - find . -type d -name "__pycache__" -exec rm -rf {} +
+    - git branch --merged | grep -v "^\*" | grep -v "main\|master" | xargs -r git branch -d
+
+  b-p:
+    desc: Bump patch version
+    cmds:
+    - uv run bump-my-version bump patch
+
+  b-m:
+    desc: Bump minor version
+    cmds:
+    - uv run bump-my-version bump minor
+
+  b-a:
+    desc: Bump major version
+    cmds:
+    - uv run bump-my-version bump major
