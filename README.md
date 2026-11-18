@@ -1,5 +1,10 @@
 # EasyCash&Tax Web
 
+[![CI](https://github.com/Kugeleis/easycash-web/actions/workflows/ci.yml/badge.svg?branch=master)](https://github.com/Kugeleis/easycash-web/actions/workflows/ci.yml)
+[![Ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json)](https://github.com/astral-sh/ruff)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![Python 3.15](https://img.shields.io/badge/python-3.15-blue.svg)](https://www.python.org/downloads/)
+
 Reimplementation of EasyCash&Tax as a FastAPI + plain HTML/JS web app.
 
 ## Architecture
