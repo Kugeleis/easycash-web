@@ -46,7 +46,6 @@ filename = "pyproject.toml"
 
 [tool.ruff]
 line-length = 100
-target-version = "py315"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "UP", "B"]

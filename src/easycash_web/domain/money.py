@@ -42,7 +42,7 @@ def cents_to_decimal(cents: int) -> Decimal:
 
 def decimal_to_cents(d: Decimal) -> int:
     """Round a Decimal (e.g. 119.00) to integer cents."""
-    return int(d.quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    return int((d * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
 
 def money_add(a: int, b: int) -> int:
