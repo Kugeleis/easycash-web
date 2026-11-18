@@ -34,6 +34,10 @@ COPY --from=builder /app/docs/ ./docs/
 # Set PATH to use uv-managed Python
 ENV PATH="/app/.venv/bin:$PATH"
 
+# Data directory (one JSON file per client)
+ENV DATA_DIR=/data
+VOLUME ["/data"]
+
 # Expose FastAPI default port
 EXPOSE 8000
 

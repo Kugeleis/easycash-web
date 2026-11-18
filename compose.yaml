@@ -1,0 +1,11 @@
+services:
+  easycash-web:
+    build: .
+    image: easycash-web
+    container_name: easycash-web
+    ports:
+      - "8999:8000"
+    environment:
+      - DATA_DIR=/data
+    volumes:
+      - ./data:/data
