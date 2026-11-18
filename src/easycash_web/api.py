@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Response, UploadFile
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from easycash_web.domain.reports import (
@@ -72,6 +73,15 @@ async def health():
 async def schema():
     """Serve generated JSON Schema from Pydantic models."""
     return BookFile.model_json_schema()
+
+
+# ── SPA root route ───────────────────────────────────────────────────────────
+
+
+@app.get("/", include_in_schema=False)
+async def root():
+    """Serve the single-page application index."""
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 # ── Book file CRUD ───────────────────────────────────────────────────────────
