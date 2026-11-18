@@ -97,10 +97,23 @@ async function selectClient(clientId, clientName) {
     showView("bookings");
 }
 
-async function createNewClient() {
-    const name = prompt("Neuen Mandanten-Namen eingeben:", "");
-    if (!name) return;
+async function createNewClient(event) {
+    event.preventDefault();
+    const form = document.getElementById("new-client-form");
+    const input = document.getElementById("new-client-name");
+    const submitButton = form.querySelector('button[type="submit"]');
+    const errorMessage = document.getElementById("new-client-error");
+    const name = input.value.trim();
+    if (!name) {
+        input.setCustomValidity("Bitte geben Sie einen Namen ein.");
+        input.reportValidity();
+        return;
+    }
 
+    input.setCustomValidity("");
+    submitButton.disabled = true;
+    errorMessage.textContent = "";
+    errorMessage.classList.add("hidden");
     try {
         await apiPost(`/book/${encodeURIComponent(name)}`, {
             format: "easycash-web",
@@ -109,9 +122,14 @@ async function createNewClient() {
         });
         await loadClientSelect();
         await loadClients();
+        form.reset();
+        form.classList.add("hidden");
         await selectClient(name, name);
     } catch (e) {
-        alert(`Fehler: ${e.message}`);
+        errorMessage.textContent = `Fehler: ${e.message}`;
+        errorMessage.classList.remove("hidden");
+    } finally {
+        submitButton.disabled = false;
     }
 }
 
@@ -209,43 +227,63 @@ function initGrid(bookings) {
     });
 }
 
-// ── New booking dialog ────────────────────────────────────────────────────
+// ── New booking form ─────────────────────────────────────────────────────
 
-function showNewBookingDialog() {
+function showNewBookingForm() {
     if (!currentClient) {
         alert(i18n.client?.select_first || "Bitte wählen Sie zuerst einen Mandanten aus.");
         return;
     }
-    const date = prompt("Datum (YYYY-MM-DD):", new Date().toISOString().slice(0, 10));
-    if (!date) return;
-    const description = prompt("Beschreibung:", "");
-    const accountName = prompt("Konto:", "");
-    const grossStr = prompt("Betrag (€):", "0.00");
-    const vatStr = prompt("MwSt-Satz (%):", "19");
-    const receipt = prompt("Belegnummer:", "");
+    const form = document.getElementById("new-booking-form");
+    form.classList.remove("hidden");
+    document.getElementById("booking-date").value = new Date().toISOString().slice(0, 10);
+    document.getElementById("booking-date").focus();
+}
 
-    const gross = parseFloat(grossStr?.replace(",", "."));
-    const vat = parseFloat(vatStr?.replace(",", "."));
-    if (isNaN(gross) || isNaN(vat)) {
-        alert("Ungültiger Betrag oder MwSt-Satz.");
+async function createNewBooking(event) {
+    event.preventDefault();
+    const form = document.getElementById("new-booking-form");
+    const errorMessage = document.getElementById("new-booking-error");
+    const submitButton = form.querySelector('button[type="submit"]');
+    const amountText = document.getElementById("booking-amount").value.trim();
+    const vatText = document.getElementById("booking-vat").value.trim();
+    const amount = Number(amountText.replace(",", "."));
+    const vat = Number(vatText.replace(",", "."));
+
+    if (!Number.isFinite(amount) || !Number.isFinite(vat)) {
+        errorMessage.textContent = "Ungültiger Betrag oder MwSt-Satz.";
+        errorMessage.classList.remove("hidden");
         return;
     }
 
+    const date = document.getElementById("booking-date").value;
+    const [year, month] = date.split("-").map(Number);
     const payload = {
         date,
-        description: description || "",
-        account_name: accountName || "",
-        gross_cents: Math.round(gross * 100),
+        description: document.getElementById("booking-description").value,
+        account_name: document.getElementById("booking-account").value,
+        gross_cents: Math.round(amount * 100),
         vat_rate_percent: vat,
         vat_rate_promille: Math.round(vat * 1000),
-        receipt_number: receipt || "",
-        year: parseInt(date.slice(0, 4), 10),
-        month: parseInt(date.slice(5, 7), 10),
+        receipt_number: document.getElementById("booking-receipt").value,
+        year,
+        month,
     };
 
-    apiPost(`/bookings/${encodeURIComponent(currentClient)}`, payload)
-        .then(() => loadBook())
-        .catch((e) => console.error("Failed to create booking:", e));
+    submitButton.disabled = true;
+    errorMessage.textContent = "";
+    errorMessage.classList.add("hidden");
+    try {
+        await apiPost(`/bookings/${encodeURIComponent(currentClient)}`, payload);
+        form.reset();
+        form.classList.add("hidden");
+        await loadBook();
+    } catch (e) {
+        errorMessage.textContent = `Fehler: ${e.message}`;
+        errorMessage.classList.remove("hidden");
+    } finally {
+        submitButton.disabled = false;
+    }
 }
 
 // ── Calculator ────────────────────────────────────────────────────────────
@@ -318,9 +356,34 @@ async function init() {
     });
 
     // ── New booking button ──────────────────────────────────────────────
-    document.getElementById("new-booking").addEventListener("click", showNewBookingDialog);
+    document.getElementById("new-booking").addEventListener("click", showNewBookingForm);
 
-    document.getElementById("new-client").addEventListener("click", createNewClient);
+    const newBookingForm = document.getElementById("new-booking-form");
+    newBookingForm.addEventListener("submit", createNewBooking);
+    document.getElementById("cancel-new-booking").addEventListener("click", () => {
+        newBookingForm.reset();
+        newBookingForm.classList.add("hidden");
+        const errorMessage = document.getElementById("new-booking-error");
+        errorMessage.textContent = "";
+        errorMessage.classList.add("hidden");
+    });
+
+    const newClientForm = document.getElementById("new-client-form");
+    document.getElementById("new-client").addEventListener("click", () => {
+        newClientForm.classList.remove("hidden");
+        document.getElementById("new-client-name").focus();
+    });
+    document.getElementById("cancel-new-client").addEventListener("click", () => {
+        newClientForm.reset();
+        newClientForm.classList.add("hidden");
+        const errorMessage = document.getElementById("new-client-error");
+        errorMessage.textContent = "";
+        errorMessage.classList.add("hidden");
+    });
+    document.getElementById("new-client-name").addEventListener("input", (event) => {
+        event.target.setCustomValidity("");
+    });
+    newClientForm.addEventListener("submit", createNewClient);
 
     // Initial view: bookings if we have a client, otherwise clients
     if (currentClient) {

@@ -7,7 +7,7 @@
     <!-- Web Awesome CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <!-- Tabulator CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.15.0/dist/css/tabulator.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.2/dist/css/tabulator.min.css">
     <!-- Main styles -->
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; height: 100vh; background: #fff; }
@@ -32,7 +32,11 @@
         .nav-item:hover { background: #e0e0e0; }
         .nav-item.active { background: #3498db; color: white; }
         .view { display: block; }
-        .view.hidden { display: none !important; }
+        .hidden { display: none !important; }
+        #new-booking-form { margin-bottom: 16px; padding: 14px; background: #f4f4f4; }
+        .booking-form-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+        .booking-form-fields label { display: block; }
+        .booking-form-fields input { width: 100%; padding: 8px; box-sizing: border-box; }
         .empty-state { color: #888; font-style: italic; }
         .empty-state a { color: #3498db; }
         #client-list li { padding: 10px; border-bottom: 1px solid #eee; cursor: pointer; }
@@ -63,12 +67,44 @@
             <div class="view" id="view-clients">
                 <h2>Mandanten</h2>
                 <button id="new-client" class="btn"><i class="fa fa-plus"></i> Neuer Mandant</button>
+                <form id="new-client-form" class="hidden">
+                    <label for="new-client-name">Neuer Mandanten-Name</label>
+                    <input id="new-client-name" name="name" type="text" required>
+                    <button class="btn" type="submit">Erstellen</button>
+                    <button id="cancel-new-client" class="btn secondary" type="button">Abbrechen</button>
+                    <p id="new-client-error" class="empty-state hidden" role="alert"></p>
+                </form>
                 <div id="client-list"></div>
             </div>
 
             <!-- View: Bookings -->
             <div class="view hidden" id="view-bookings">
                 <h2>Buchungen</h2>
+                <form id="new-booking-form" class="hidden">
+                    <div class="booking-form-fields">
+                        <label for="booking-date">Datum
+                            <input id="booking-date" name="date" type="date" required>
+                        </label>
+                        <label for="booking-description">Beschreibung
+                            <input id="booking-description" name="description" type="text" maxlength="256">
+                        </label>
+                        <label for="booking-account">Konto
+                            <input id="booking-account" name="account" type="text">
+                        </label>
+                        <label for="booking-amount">Betrag (€)
+                            <input id="booking-amount" name="amount" type="text" inputmode="decimal" value="0.00" required>
+                        </label>
+                        <label for="booking-vat">MwSt-Satz (%)
+                            <input id="booking-vat" name="vat" type="text" inputmode="decimal" value="19" required>
+                        </label>
+                        <label for="booking-receipt">Belegnummer
+                            <input id="booking-receipt" name="receipt" type="text">
+                        </label>
+                    </div>
+                    <button class="btn" type="submit">Buchung speichern</button>
+                    <button id="cancel-new-booking" class="btn secondary" type="button">Abbrechen</button>
+                    <p id="new-booking-error" class="empty-state hidden" role="alert"></p>
+                </form>
                 <div class="grid-container" id="booking-grid"></div>
             </div>
 
@@ -88,7 +124,7 @@
     <!-- Web Awesome JS -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
     <!-- Tabulator JS -->
-    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.15.0/dist/js/tabulator.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
     <!-- Main JS -->
     <script type="module" src="/static/app.js"></script>
 </body>
