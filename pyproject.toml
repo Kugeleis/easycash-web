@@ -29,6 +29,9 @@ dev = [
     "pytest>=9.2.0",
     "ruff>=0.17.5",
     "ty>=0.0.105",
+    "playwright>=1.40.0",
+    "playwright[chromium]>=1.40.0",
+    "pytest-playwright>=0.10.0",
 ]
 
 [tool.bumpversion]

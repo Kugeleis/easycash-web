@@ -46,6 +46,12 @@ tasks:
     - find . -type d -name "__pycache__" -exec rm -rf {} +
     - git branch --merged | grep -v "^\*" | grep -v "main\|master" | xargs -r git branch -d
 
+  test-e2e:
+    desc: Run real browser E2E tests against the UI and API endpoints
+    cmds:
+    - uv run playwright install chromium
+    - uv run python -m pytest tests/test_e2e_web.py -q
+
   b-p:
     desc: Bump patch version
     cmds:
