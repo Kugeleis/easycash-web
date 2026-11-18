@@ -7,6 +7,17 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException, Response, UploadFile
 from fastapi.staticfiles import StaticFiles
 
+from easycash_web.domain.reports import (
+    EuerReport,
+    GuVReport,
+    JournalReport,
+    SuSaReport,
+    calculate_account_balance,
+    calculate_euer_report,
+    calculate_guv_report,
+    calculate_journal_report,
+    calculate_susa_report,
+)
 from easycash_web.models import (
     Account,
     BookFile,
@@ -256,6 +267,40 @@ async def add_business(client_name: str, biz: dict):
     b = Business(**biz)
     book.clients[0].businesses.append(b)
     return save_book(STORAGE_DIR, client_name, book)
+
+
+# ── Reports ──────────────────────────────────────────────────────────────────
+
+
+@app.get("/api/v1/reports/euer/{client_name}/{year}", response_model=EuerReport)
+async def get_euer_report(client_name: str, year: int, kleinunternehmer: bool = False):
+    book = await get_book(client_name)
+    return calculate_euer_report(book, year, kleinunternehmer)
+
+
+@app.get("/api/v1/reports/guv/{client_name}/{year}", response_model=GuVReport)
+async def get_guv_report(client_name: str, year: int):
+    book = await get_book(client_name)
+    return calculate_guv_report(book, year)
+
+
+@app.get("/api/v1/reports/susa/{client_name}/{year}", response_model=SuSaReport)
+async def get_susa_report(client_name: str, year: int):
+    book = await get_book(client_name)
+    return calculate_susa_report(book, year)
+
+
+@app.get("/api/v1/reports/journal/{client_name}/{year}", response_model=JournalReport)
+async def get_journal_report(client_name: str, year: int):
+    book = await get_book(client_name)
+    return calculate_journal_report(book, year)
+
+
+@app.get("/api/v1/reports/accounts/{client_name}/{account_id}/balance")
+async def get_account_balance(client_name: str, account_id: str, year: int):
+    book = await get_book(client_name)
+    balance = calculate_account_balance(book, account_id, year)
+    return {"account_id": account_id, "year": year, "balance_cents": balance}
 
 
 # ── Startup: ensure DATA_DIR exists via lifespan (FastAPI ≥0.9) ──────────────────
