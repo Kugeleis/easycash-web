@@ -1,12 +1,14 @@
 /**
  * EasyCash&Tax Web – Frontend ES module.
- * Handles client selection, booking grid (Tabulator), and calculator.
+ * Handles client selection, booking grid (Tabulator), calculator, and view navigation.
  */
 
 const API_BASE = "/api/v1";
 
 let currentClient = null;
+let clientListDOM = null;
 let grid = null;
+let currentView = "bookings";
 
 // ── i18n ──────────────────────────────────────────────────────────────────
 
@@ -49,18 +51,77 @@ async function apiPut(path, body) {
     return resp.json();
 }
 
-async function apiDelete(path) {
-    const resp = await fetch(`${API_BASE}${path}`, { method: "DELETE" });
-    if (!resp.ok) throw new Error(`DELETE ${path} failed: ${resp.status}`);
-    return resp.json();
+// ── View switching ────────────────────────────────────────────────────────
+
+function showView(viewName) {
+    // Hide all views
+    document.querySelectorAll(".view").forEach(v => v.classList.add("hidden"));
+    // Remove active class from all nav items
+    document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+    // Show the selected view
+    const view = document.getElementById(`view-${viewName}`);
+    if (view) view.classList.remove("hidden");
+    // Mark the matching nav item active
+    const navId = viewName === "bookings" ? "nav-booking" : `nav-${viewName}`;
+    const nav = document.getElementById(navId);
+    if (nav) nav.classList.add("active");
+    currentView = viewName;
 }
 
 // ── Client management ─────────────────────────────────────────────────────
 
 async function loadClients() {
     const data = await apiGet("/clients");
+    const clientList = document.getElementById("client-list");
+    clientList.innerHTML = "";
+
+    if (data.clients.length === 0) {
+        clientList.innerHTML = `<p class="empty-state">Kein Mandant vorhanden.</p>`;
+        return;
+    }
+
+    const ul = document.createElement("ul");
+    for (const c of data.clients) {
+        const li = document.createElement("li");
+        li.textContent = `${c.name} (rev ${c.revision})`;
+        li.dataset.clientId = c.id;
+        li.addEventListener("click", () => selectClient(c.id, c.name));
+        ul.appendChild(li);
+    }
+    clientList.appendChild(ul);
+}
+
+async function selectClient(clientId, clientName) {
+    currentClient = clientId;
+    await loadBook();
+    showView("bookings");
+}
+
+async function createNewClient() {
+    const name = prompt("Neuen Mandanten-Namen eingeben:", "");
+    if (!name) return;
+
+    try {
+        await apiPost(`/book/${encodeURIComponent(name)}`, {
+            format: "easycash-web",
+            format_version: 1,
+            meta: { client_name: name },
+        });
+        await loadClientSelect();
+        await loadClients();
+        await selectClient(name, name);
+    } catch (e) {
+        alert(`Fehler: ${e.message}`);
+    }
+}
+
+// ── Client select dropdown ────────────────────────────────────────────────
+
+async function loadClientSelect() {
+    const data = await apiGet("/clients");
     const select = document.getElementById("client-select");
     select.innerHTML = "<option value=\"\">Select client...</option>";
+
     for (const c of data.clients) {
         const opt = document.createElement("option");
         opt.value = c.id;
@@ -70,9 +131,11 @@ async function loadClients() {
     select.addEventListener("change", async (e) => {
         currentClient = e.target.value || null;
         if (currentClient) {
+            showView("bookings");
             await loadBook();
         } else {
-            clearGrid();
+            showView("clients");
+            await loadClients();
         }
     });
 }
@@ -130,7 +193,6 @@ function initGrid(bookings) {
         ],
         cellEdited: async (cell) => {
             const row = cell.getRow().getData();
-            // Convert gross_cents from input string back to int if edited
             if (cell.getField() === "gross_cents") {
                 const val = parseFloat(String(cell.getValue()).replace(",", "."));
                 if (!isNaN(val)) {
@@ -188,12 +250,10 @@ function showNewBookingDialog() {
 // ── Calculator ────────────────────────────────────────────────────────────
 
 function evaluateExpression(expr) {
-    // Safe evaluation: allow only digits, operators, parentheses, decimal separators
     const sanitized = expr.replace(/,/g, ".");
     if (!/^[\d+\-*/().\s]+$/.test(sanitized)) {
         throw new Error("Invalid characters in expression");
     }
-    // eslint-disable-next-line no-new-func
     const result = Function(`"use strict"; return (${sanitized});`)();
     if (typeof result !== "number" || !isFinite(result)) {
         throw new Error("Invalid result");
@@ -210,23 +270,16 @@ function setupCalculator() {
         try {
             const result = evaluateExpression(input.value);
             input.value = result.toFixed(2);
+            document.getElementById("calc-result").textContent = `Ergebnis: €${result.toFixed(2)}`;
         } catch (e) {
             alert(`Fehler: ${e.message}`);
+            document.getElementById("calc-result").textContent = "";
         }
     });
 
     clearBtn.addEventListener("click", () => {
         input.value = "";
-    });
-}
-
-// ── Navigation ────────────────────────────────────────────────────────────
-
-function setupNavigation() {
-    document.getElementById("nav-client").addEventListener("click", (e) => {
-        e.preventDefault();
-        // Client management would be a separate view; for now, focus the select.
-        document.getElementById("client-select").focus();
+        document.getElementById("calc-result").textContent = "";
     });
 }
 
@@ -234,10 +287,47 @@ function setupNavigation() {
 
 async function init() {
     i18n = await loadI18n();
+
+    // Load client select and populate list
+    await loadClientSelect();
     await loadClients();
+
     setupCalculator();
-    setupNavigation();
+
+    // ── Navigation ────────────────────────────────────────────────────
+    document.getElementById("nav-client").addEventListener("click", (e) => {
+        e.preventDefault();
+        showView("clients");
+    });
+
+    document.getElementById("nav-booking").addEventListener("click", async (e) => {
+        e.preventDefault();
+        if (!currentClient) {
+            alert(i18n.select_client_first || "Bitte wählen Sie zuerst einen Mandanten aus.");
+            showView("clients");
+            return;
+        }
+        showView("bookings");
+        await loadBook();
+    });
+
+    document.getElementById("nav-calculator").addEventListener("click", (e) => {
+        e.preventDefault();
+        showView("calculator");
+    });
+
+    // ── New booking button ──────────────────────────────────────────────
     document.getElementById("new-booking").addEventListener("click", showNewBookingDialog);
+
+    document.getElementById("new-client").addEventListener("click", createNewClient);
+
+    // Initial view: bookings if we have a client, otherwise clients
+    if (currentClient) {
+        showView("bookings");
+        await loadBook();
+    } else {
+        showView("clients");
+    }
 }
 
 document.addEventListener("DOMContentLoaded", init);
